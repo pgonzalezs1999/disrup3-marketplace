@@ -153,8 +153,6 @@ const Navbar = () => {
           )}
         </div>
       </nav>
-
-      <div className="divider mb-0"></div>
     </>
   );
 };

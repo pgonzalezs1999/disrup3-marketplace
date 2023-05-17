@@ -99,8 +99,6 @@ const UserPage: NextPage<{
 
 export default UserPage;
 
-// You should use getServerSideProps when:
-// - Only if you need to pre-render a page whose data must be fetched at request time
 import { GetServerSideProps, NextPage } from "next";
 import { withSessionSsr } from "@/utils/ironSession";
 import { PrismaClient, User } from "@prisma/client";

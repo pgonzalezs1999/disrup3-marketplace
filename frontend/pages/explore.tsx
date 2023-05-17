@@ -17,9 +17,13 @@ const { collections } = ctx;
 
   return (
     <MainLayout>
-        <div className='m-5'>
+        <div className="m-5">
             <h2 className='text-4xl font-bold text-primary text-center mb-2'>Explora las mejores colecciones NFT</h2>
             <p className='text-center text-xl opacity-80'>Browse between the collections listed in our marketplace</p>
+        </div>
+        <div className="m-5 flex gap-3 items-center justify-center">
+            <p className="">Missing your collection?</p>
+            <Link href="/addCollection" className="btn btn-accent">Import it now</Link>
         </div>
 
         <div className='flex flex-wrap gap-5 m-auto w-[80%] justify-center mt-14 mb-10'>
@@ -46,7 +50,7 @@ const { collections } = ctx;
 
 export default explore
 
-import { GetServerSideProps, NextPage } from 'next'
+import { GetServerSideProps, NextPage } from 'next';
 import { PrismaClient } from "@prisma/client";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

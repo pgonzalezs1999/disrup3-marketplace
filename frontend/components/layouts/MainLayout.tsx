@@ -8,11 +8,11 @@ interface Props {
 
 const MainLayout: FC<Props> = ({children}) => {
   return (
-    <>
+    <div className="flex flex-col justify-between h-[100vh]">
         <Navbar/>
             {children}     
         <Footer />      
-    </>
+    </div>
    
   )
 }

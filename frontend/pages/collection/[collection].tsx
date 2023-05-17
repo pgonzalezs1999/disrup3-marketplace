@@ -2,8 +2,20 @@ import MainLayout from '@/components/layouts/MainLayout';
 import React, { FC, useState, ChangeEvent } from 'react';
 import Modal from "react-modal";
 import { NextPage } from 'next';
-import { PrismaClient, User } from "@prisma/client";
-import { shortenAddress } from "@/utils/address";
+import { PrismaClient } from "@prisma/client";
+import { useRouter } from "next/router";
+
+const customStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "transparent",
+  },
+};
 
 type NFTData = {
   id: string;
@@ -23,8 +35,6 @@ type Collection = {
   bgImage: string,
   floorPrice: number,
   website: string,
-  discord: string,
-  twitter: string,
 }
 
 const collectionPage: NextPage<{
@@ -61,11 +71,7 @@ const collectionPage: NextPage<{
               <p>Unique owners: 0</p>
               <p>Floor price: {collection.floorPrice} ETH</p>
             </div>
-            <div className="flex gap-3">
-              <a href={collection.website} target="blank">Website</a>
-              <a href={collection.twitter} target="blank">Twitter</a>
-              <a href={collection.discord} target="blank">Discord</a>
-            </div>
+            <a href={collection.website} target="blank">Website</a>
             {isEditable && (
               <button
               onClick={() => setModalOpen(!modalOpen)}
@@ -94,6 +100,7 @@ const collectionPage: NextPage<{
       </section>
       <Modal
         isOpen={modalOpen}
+        style={customStyles}
         onRequestClose={() => setModalOpen(!modalOpen)}
       >
         <EditCollectionForm closeModal={setModalOpen} />
@@ -104,18 +111,55 @@ const collectionPage: NextPage<{
 
 export default collectionPage
 
+import { GetServerSideProps } from "next";
+import { withSessionSsr } from "@/utils/ironSession";
+import axios from "axios";
+
+export const getServerSideProps: GetServerSideProps = withSessionSsr(
+  async (ctx) => {
+    const prisma = new PrismaClient();
+    const collectionAddress = ctx.query.collection;
+    console.log("ctx.query =", ctx.query);
+    const collectionData = await prisma.collection.findUnique({
+      where: {
+        address: (collectionAddress as string) || "",
+      },
+    });
+    if(!collectionData) {
+      return {
+        redirect: {
+          destination: "/404",
+          permanent: false,
+        },
+      };
+    }
+    
+    const { data } = await axios.get(
+      `https://eth-mainnet.g.alchemy.com/nft/v2/${process.env.ALCHEMY_API_KEY}/getNFTsForCollection?contractAddress=${collectionData.address}&withMetadata=true`
+    );
+    
+    return {
+      props: {
+        collection: collectionData,
+        isEditable: ctx.req.session.user?.address == collectionData.owner,
+        collectionNfts: data.nfts,
+      },
+    };
+  }
+);
+
 interface Props {
   closeModal: (newState: boolean) => void;
 }
 
 const EditCollectionForm: FC<Props> = ({ closeModal }) => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
+    address: router.query.collection,
     name: "",
     profileImage: "",
     bgImage: "",
     website: "",
-    twitter: "",
-    discord: "",
   });
 
   const updateForm = (e: ChangeEvent<HTMLInputElement>) => {
@@ -151,119 +195,49 @@ const EditCollectionForm: FC<Props> = ({ closeModal }) => {
         <div className="flex flex-col">
           <label>Name:</label>
           <input
-            name="description"
+            name="name"
             type="text"
             onChange={(e) => updateForm(e)}
             className="input input-primary mb-5"
-            placeholder="Descripción"
+            placeholder="Name"
             value={formData.name}
           ></input>
         </div>
         <div className="flex flex-col">
           <label>Profile image</label>
           <input
-            name="userName"
+            name="profileImage"
             type="text"
             onChange={(e) => updateForm(e)}
             className="input input-primary mb-5"
-            placeholder="username"
+            placeholder="Profile image"
             value={formData.profileImage}
           ></input>
         </div>
         <div className="flex flex-col">
           <label>Background image</label>
           <input
-            name="pImg"
+            name="bgImage"
             type="text"
             onChange={(e) => updateForm(e)}
             className="input input-primary mb-5"
-            placeholder="Imagen de perfil"
-            value={formData.profileImage}
+            placeholder="Background image"
+            value={formData.bgImage}
           ></input>
         </div>
         <div className="flex flex-col">
           <label>Website URL</label>
           <input
-            name="bgImg"
+            name="website"
             type="text"
             onChange={(e) => updateForm(e)}
             className="input input-primary mb-5"
-            placeholder="Imagen de fondo"
+            placeholder="Website URL"
             value={formData.website}
           ></input>
-        </div>
-        <div className="flex flex-col">
-          <label>Twitter URL</label>
-          <input
-            name="bgImg"
-            type="text"
-            onChange={(e) => updateForm(e)}
-            className="input input-primary mb-5"
-            placeholder="Imagen de fondo"
-            value={formData.twitter}
-          ></input>
-          <div className="flex flex-col">
-          <label>Discord URL</label>
-          <input
-            name="bgImg"
-            type="text"
-            onChange={(e) => updateForm(e)}
-            className="input input-primary mb-5"
-            placeholder="Imagen de fondo"
-            value={formData.discord}
-          ></input>
-        </div>
         </div>
         <button onClick={handleSubmit}>Actualizar</button>
       </form>
     </section>
   );
 };
-
-import { GetServerSideProps } from "next";
-import { withSessionSsr } from "@/utils/ironSession";
-import axios from "axios";
-
-export const getServerSideProps: GetServerSideProps = withSessionSsr(
-  async (ctx) => {
-    const prisma = new PrismaClient();
-    const collectionAddress = ctx.query.collection;
-    console.log("ctx.query =", ctx.query);
-    const collectionData = await prisma.collection.findUnique({
-      where: {
-        address: (collectionAddress as string) || "",
-      },
-    });
-    if(!collectionData) {
-      return {
-        redirect: {
-          destination: "/404",
-          permanent: false,
-        },
-      };
-    }
-    
-    const { data } = await axios.get(
-      `https://eth-mainnet.g.alchemy.com/nft/v2/${process.env.ALCHEMY_API_KEY}/getNFTsForCollection?contractAddress=${collectionData.address}&withMetadata=true`
-    );
-    
-    const userAddress = ctx.req.session.user?.address;
-    if(userAddress) {
-      return {
-        props: {
-          collection: collectionData,
-          isEditable: true,
-          collectionNfts: data.nfts,
-        },
-      };
-    } else {
-      return {
-        props: {
-          collection: collectionData,
-          isEditable: false,
-          collectionNfts: data.nfts,
-        },
-      };
-    }
-  }
-);
