@@ -9,7 +9,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         case "PATCH":
         const userAddress = req.session.user?.address;
         const { formData } = req.body;
-        console.log(formData, "_-------------______---______--______--____")
          // comprobamos que el usuario esta autenticado 
          if(!userAddress) {
             return res.status(400).json({
@@ -28,7 +27,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 userName: formData.userName || undefined
             }
          })
-         console.log(newUserData);
          return res.status(200).json({
             user: newUserData,
             message: "user updated"

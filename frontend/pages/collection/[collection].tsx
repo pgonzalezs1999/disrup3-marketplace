@@ -4,6 +4,7 @@ import Modal from "react-modal";
 import { NextPage } from 'next';
 import { PrismaClient } from "@prisma/client";
 import { useRouter } from "next/router";
+import { Collection, NFTData } from '@/types';
 
 const customStyles = {
   content: {
@@ -17,33 +18,13 @@ const customStyles = {
   },
 };
 
-type NFTData = {
-  id: string;
-  tokenId: string;
-  media: media[];
-};
-
-type media = {
-  gateway: string;
-};
-
-type Collection = {
-  address: string,
-  name: string,
-  desc: string,
-  profileImage: string,
-  bgImage: string,
-  floorPrice: number,
-  website: string,
-}
-
 const collectionPage: NextPage<{
   collection: Collection;
   isEditable: boolean;
   collectionNfts: NFTData[];
 }> = ({ isEditable, collection, collectionNfts }) => {
   const [modalOpen, setModalOpen] = useState(false);
-
+  console.log(collection);
   return (
     <MainLayout>
       <section>
@@ -73,12 +54,9 @@ const collectionPage: NextPage<{
             </div>
             <a href={collection.website} target="blank">Website</a>
             {isEditable && (
-              <button
-              onClick={() => setModalOpen(!modalOpen)}
-              className="bg-primary m-5 p-3 border-2 border-secondary rounded-xl"
-            >
-              Edit collection
-            </button>
+              <CustomButton onClick={() => setModalOpen(!modalOpen)}>
+                Edit collection
+              </CustomButton>
             )}
           </div>
       </section>
@@ -114,12 +92,12 @@ export default collectionPage
 import { GetServerSideProps } from "next";
 import { withSessionSsr } from "@/utils/ironSession";
 import axios from "axios";
+import CustomButton from '@/components/CustomButton';
 
 export const getServerSideProps: GetServerSideProps = withSessionSsr(
   async (ctx) => {
     const prisma = new PrismaClient();
     const collectionAddress = ctx.query.collection;
-    console.log("ctx.query =", ctx.query);
     const collectionData = await prisma.collection.findUnique({
       where: {
         address: (collectionAddress as string) || "",
@@ -167,13 +145,12 @@ const EditCollectionForm: FC<Props> = ({ closeModal }) => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    console.log(formData);
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const updateCollection= await fetch("/api/collection/editCollection", {
+      const updateCollection = await fetch("/api/collection/editCollection", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -181,7 +158,6 @@ const EditCollectionForm: FC<Props> = ({ closeModal }) => {
         body: JSON.stringify({ formData }),
       });
 
-      console.log(updateCollection);
       closeModal(false);
     } catch (error) {
       console.log(error);
@@ -236,7 +212,9 @@ const EditCollectionForm: FC<Props> = ({ closeModal }) => {
             value={formData.website}
           ></input>
         </div>
-        <button onClick={handleSubmit}>Actualizar</button>
+        <CustomButton onClick={handleSubmit}>
+          Actualizar
+        </CustomButton>
       </form>
     </section>
   );

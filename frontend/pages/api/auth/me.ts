@@ -1,6 +1,5 @@
 import { withSessionRoute } from "@/utils/ironSession";
-import {NextApiRequest, NextApiResponse} from  "next"
-import {generateNonce} from "siwe"
+import { NextApiRequest, NextApiResponse } from  "next"
 
 const handler = async  (req: NextApiRequest, res: NextApiResponse) => {
     switch(req.method) {
@@ -17,15 +16,15 @@ const handler = async  (req: NextApiRequest, res: NextApiResponse) => {
                         role: req.session.user?.role
                     }
                 });
-               } else {
-                return res.status(200).json({isLoggedIn: false});
-               }
-      
+            } else {
+                return res.status(200).json({
+                    isLoggedIn: false
+                });
+            }
         default: 
             // DEVOLVER QUE SOLO ACEPTAMOS METODO GET 
            return res.status(400).json({message: "ONLY METHOD GET ALLOWED"})
     }
 }
-
 
 export default withSessionRoute(handler);

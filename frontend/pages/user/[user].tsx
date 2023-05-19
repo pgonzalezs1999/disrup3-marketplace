@@ -1,6 +1,7 @@
 import MainLayout from "@/components/layouts/MainLayout";
 import { ChangeEvent, FC, useState } from "react";
 import Modal from "react-modal";
+import { NFTData } from '@/types';
 
 const customStyles = {
   content: {
@@ -12,15 +13,6 @@ const customStyles = {
     transform: "translate(-50%, -50%)",
     backgroundColor: "transparent",
   },
-};
-
-type NFTData = {
-  title: string;
-  media: media[];
-};
-
-type media = {
-  gateway: string;
 };
 
 const UserPage: NextPage<{
@@ -60,13 +52,13 @@ const UserPage: NextPage<{
               <p>Followers: 0</p>
             </div>
             {isEditable && (
-              <button onClick={() => setModalOpen(!modalOpen)}>
+              <CustomButton onClick={() => setModalOpen(!modalOpen)}>
                 Edit profile
-              </button>
+              </CustomButton>
             )}
-            <button onClick={() => setModalOpen(!modalOpen)}>
-                "Edit profile" de pruebas
-              </button>
+            <CustomButton onClick={() => setModalOpen(!modalOpen)}>
+              "Edit profile" de pruebas
+            </CustomButton>
           </div>
         </div>
       </section>
@@ -104,6 +96,7 @@ import { withSessionSsr } from "@/utils/ironSession";
 import { PrismaClient, User } from "@prisma/client";
 import { shortenAddress } from "@/utils/address";
 import axios from "axios";
+import CustomButton from "@/components/CustomButton";
 
 export const getServerSideProps: GetServerSideProps = withSessionSsr(
   async (ctx) => {
@@ -115,7 +108,7 @@ export const getServerSideProps: GetServerSideProps = withSessionSsr(
         address: (ctx.query.user as string) || "",
       },
     });
-    if (!userData) {
+    if(!userData) {
       return {
         redirect: {
           destination: "/404",
@@ -127,10 +120,7 @@ export const getServerSideProps: GetServerSideProps = withSessionSsr(
     const { data } = await axios.get(
       `https://eth-mainnet.g.alchemy.com/nft/v2/${process.env.ALCHEMY_API_KEY}/getNFTs?owner=0xa64eeA6462463455807cdA93159aDfAa44B63dca`
     );
-    console.log(
-      { data },
-      "--------------------------------------------------------"
-    );
+
     return {
       props: {
         user: userData,
@@ -158,7 +148,6 @@ const EditUserForm: FC<Props> = ({ closeModal }) => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    console.log(formData);
   };
 
   const handleSubmit = async (e: any) => {
@@ -172,7 +161,6 @@ const EditUserForm: FC<Props> = ({ closeModal }) => {
         body: JSON.stringify({ formData }),
       });
 
-      console.log(updateUser);
       closeModal(false);
     } catch (error) {
       console.log(error);
@@ -227,7 +215,9 @@ const EditUserForm: FC<Props> = ({ closeModal }) => {
             value={formData.bgImg}
           ></input>
         </div>
-        <button onClick={handleSubmit}>Actualizar</button>
+        <CustomButton onClick={handleSubmit}>
+          Actualizar
+        </CustomButton>
       </form>
     </section>
   );

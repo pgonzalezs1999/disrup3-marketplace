@@ -11,16 +11,16 @@ import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { goerli } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
-
-
+import { useRouter } from 'next/router';
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
 
   const { chains, provider } = configureChains(
     [goerli],
     [
-      alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }),
-      publicProvider()
+      alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }),
+      publicProvider(),
     ]
   );
   
@@ -33,16 +33,18 @@ export default function App({ Component, pageProps }: AppProps) {
   const wagmiClient = createClient({
     autoConnect: false,
     connectors,
-    provider
-  })
+    provider,
+  });
 
-  return (
+  const goBack = () => {
+    router.back();
+  };
+
+  return(
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains} theme={midnightTheme({
-        
-      })}>
+      <RainbowKitProvider chains={chains} theme={midnightTheme({})}>
         <Component {...pageProps} />
       </RainbowKitProvider>
     </WagmiConfig>
-  )
+  );
 }
