@@ -24,9 +24,8 @@ const collectionPage: NextPage<{
   collectionNfts: NFTData[];
 }> = ({ isEditable, collection, collectionNfts }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  console.log(collection);
   return (
-    <MainLayout>
+    <MainLayout> 
       <section>
         <div
           style={{
@@ -47,33 +46,27 @@ const collectionPage: NextPage<{
           <div className="flex flex-col items-center mt-[75px] text-center">
             <h1 className="mt-5 text-5xl mb-5">{collection.name}</h1>
             <p>Collection address: {collection.address}</p>
-            <div className="flex gap-3">
-              <p>Items: 0</p>
-              <p>Unique owners: 0</p>
               <p>Floor price: {collection.floorPrice} ETH</p>
-            </div>
             <a href={collection.website} target="blank">Website</a>
             {isEditable && (
               <CustomButton onClick={() => setModalOpen(!modalOpen)}>
                 Edit collection
               </CustomButton>
             )}
+            <CustomButton onClick={() => setModalOpen(!modalOpen)}>
+                "Edit collection" testing
+              </CustomButton>
           </div>
       </section>
       <div className="divider mt-[14vh]"></div>
       <section className=" mx-10 flex items-center justify-center gap-5 flex-wrap mt-10">
         {collectionNfts.map((nft, index) => (
-          <div key={index} className="card w-[250px] bg-base-100 shadow-xl">
-            <figure>
-              <img
-                src={nft.media[0].gateway}
-                alt={`imagen del nft ${nft.tokenId}`}
-              />
-            </figure>
-            <div className="card-body">
-              <p>#{nft.tokenId}</p>
-            </div>
-          </div>
+          <NftCard
+            key={index}
+            id={Number(nft.id.tokenId)}
+            imgUrl={nft.media[0].gateway}
+            className="w-[20vw] min-w-[150px] max-w-[300px]"
+          />
         ))}
       </section>
       <Modal
@@ -93,6 +86,7 @@ import { GetServerSideProps } from "next";
 import { withSessionSsr } from "@/utils/ironSession";
 import axios from "axios";
 import CustomButton from '@/components/CustomButton';
+import NftCard from '@/components/NftCard';
 
 export const getServerSideProps: GetServerSideProps = withSessionSsr(
   async (ctx) => {
@@ -119,7 +113,7 @@ export const getServerSideProps: GetServerSideProps = withSessionSsr(
     return {
       props: {
         collection: collectionData,
-        isEditable: ctx.req.session.user?.address == collectionData.owner,
+        isEditable: ctx.req.session.user?.address.toLowerCase() == collectionData.owner.toLowerCase(),
         collectionNfts: data.nfts,
       },
     };

@@ -8,7 +8,6 @@ const Hero = () => {
             {/* Borrar desde aqui */}
             <h1 className="text-3xl font-bold">BUGS/DUDAS:</h1>
             <ul>
-                <li className="list-disc">Por qué no se me muestran los tokenID de los NFT en collection</li>
                 <li className="list-disc">El manejo de login funciona de aquella manera</li>
                 <li className="list-disc">Alchemy solo me devuelve 100 NFTS</li>
             </ul>

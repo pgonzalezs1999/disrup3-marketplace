@@ -23,9 +23,10 @@ interface Collection {
 };
 
 interface NFTData {
-    id: string;
-    tokenId: string;
     title: string;
+    id: {
+        tokenId: number;
+    }
     media: media[];
 };
 
