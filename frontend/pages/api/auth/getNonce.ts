@@ -8,6 +8,7 @@ const handler = async  (req: NextApiRequest, res: NextApiResponse) => {
             // LOGICA DEL ENDPOINT            
             // devolver un nonce aleatorio
             const nonce = generateNonce();
+            console.log(nonce);
             req.session.nonce = nonce;
             await req.session.save()
             res.status(200).json({nonce});

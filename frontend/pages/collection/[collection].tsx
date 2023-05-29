@@ -21,8 +21,8 @@ const customStyles = {
 const collectionPage: NextPage<{
   collection: Collection;
   isEditable: boolean;
-  collectionNfts: NFTData[];
-}> = ({ isEditable, collection, collectionNfts }) => {
+  listings: NFTData[];
+}> = ({ isEditable, collection, listings }) => {
   const [modalOpen, setModalOpen] = useState(false);
   return (
     <MainLayout> 
@@ -46,7 +46,6 @@ const collectionPage: NextPage<{
           <div className="flex flex-col items-center mt-[75px] text-center">
             <h1 className="mt-5 text-5xl mb-5">{collection.name}</h1>
             <p>Collection address: {collection.address}</p>
-              <p>Floor price: {collection.floorPrice} ETH</p>
             <a href={collection.website} target="blank">Website</a>
             {isEditable && (
               <CustomButton onClick={() => setModalOpen(!modalOpen)}>
@@ -54,15 +53,15 @@ const collectionPage: NextPage<{
               </CustomButton>
             )}
             <CustomButton onClick={() => setModalOpen(!modalOpen)}>
-                "Edit collection" testing
-              </CustomButton>
+              "Edit collection" testing
+            </CustomButton>
           </div>
       </section>
       <div className="divider mt-[14vh]"></div>
       <section className=" mx-10 flex items-center justify-center gap-5 flex-wrap mt-10">
-        {collectionNfts.map((nft, index) => (
+        {listings.map((nft, key) => (
           <NftCard
-            key={index}
+            key={key}
             id={Number(nft.id.tokenId)}
             imgUrl={nft.media[0].gateway}
             className="w-[20vw] min-w-[150px] max-w-[300px]"
@@ -74,7 +73,7 @@ const collectionPage: NextPage<{
         style={customStyles}
         onRequestClose={() => setModalOpen(!modalOpen)}
       >
-        <EditCollectionForm closeModal={setModalOpen} />
+        <EditCollectionForm closeModal={setModalOpen}/>
       </Modal>
     </MainLayout>
   );
@@ -105,16 +104,20 @@ export const getServerSideProps: GetServerSideProps = withSessionSsr(
         },
       };
     }
-    
+
+    const listings = await prisma.listing.findMany({
+      where: {
+        nftAddress: collectionAddress as string || "",
+      },
+    });
     const { data } = await axios.get(
       `https://eth-mainnet.g.alchemy.com/nft/v2/${process.env.ALCHEMY_API_KEY}/getNFTsForCollection?contractAddress=${collectionData.address}&withMetadata=true`
     );
-    
     return {
       props: {
         collection: collectionData,
-        isEditable: ctx.req.session.user?.address.toLowerCase() == collectionData.owner.toLowerCase(),
-        collectionNfts: data.nfts,
+        isEditable: ctx.req.session.user?.address.toLowerCase() == collectionData.owner?.toLowerCase(),
+        listings: data.nfts,
       },
     };
   }

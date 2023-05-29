@@ -25,8 +25,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 profileImage: formData.profileImage || undefined,
                 bgImage: formData.bgImage || undefined,
                 website: formData.website || undefined,
-                twitter: formData.twitter || undefined,
-                discord: formData.discord || undefined,
             }
          })
          return res.status(200).json({

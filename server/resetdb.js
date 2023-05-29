@@ -1,10 +1,9 @@
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient } = require("./src/client/generate");
 const prisma = new PrismaClient();
 
 const resetDb = async () => {
   console.info("Resetting database...");
-  await prisma.payment.deleteMany();
-  await prisma.Tracker_State.deleteMany();
+  await prisma.tracker_State.deleteMany();
 };
 
 resetDb()

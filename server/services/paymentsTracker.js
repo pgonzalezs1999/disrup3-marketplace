@@ -2,6 +2,7 @@ require("dotenv").config();
 const ethers = require("ethers");
 const contractsData = require("../constants/constant.json");
 const axios = require("axios");
+const callApi = require("../utils/apiUtils");
 const decoder = new ethers.utils.AbiCoder();
 
 const CURR_CHAIN_ID = process.env.NETWORK_CHAINID ?? "31337";
@@ -9,51 +10,40 @@ const provider = new ethers.providers.JsonRpcProvider(
   process.env.LOCALHOST_RPC_PROVIDER ?? "http://127.0.0.1:8545/"
 );
 
-const loadPaymentsContract = () => {
+const loadMarketplaceContract = () => {
   const abi = contractsData[CURR_CHAIN_ID].abi;
   const address = contractsData[CURR_CHAIN_ID].address;
   return new ethers.Contract(address, abi, provider);
 };
 
-const callApi = async () => {
-  try {
-  } catch (error) {
-    // TODO: if bad request save event en dead events queue
-  }
-};
-
-const processPaymentsEvents = async (startFromBlock, prisma) => {
+const processMarketplaceEvents = async (startFromBlock, prisma) => {
   const currentBlock = await provider.getBlockNumber();
-  const paymentsSc = loadPaymentsContract();
+  const marketplaceSC = loadMarketplaceContract();
   let lastBlockProcessed = startFromBlock;
 
   console.info(
     `Processing events from block ${startFromBlock} to ${currentBlock}`
   );
 
-  const handlepaymentEvents = async (events) => {
+  const handleMarketplaceEvents = async (events) => {
     // logic for handling paymentEvents
     for (const event of events) {
-      console.log(event.blockNumber, "blockNumber");
-      const eventData = {
-        id: Number(event.args.paymentId),
-        user: event.args.user,
-        amount: Number(event.args.amount),
-      };
+      if (event.event === "ItemListed") {
+        processListed(event);
+      }
 
-      await prisma.payment.create({
-        data: {
-          ...eventData,
-        },
-      });
+      if (event.event === "ItemBought") {
+        processSale(event);
+      }
 
+      // TODO: check evento de itemcancel
       lastBlockProcessed = event.blockNumber + 1;
     }
   };
 
   try {
-    const pastEvents = await paymentsSc.queryFilter(
-      "paymentCompleted",
+    const pastEvents = await marketplaceSC.queryFilter(
+      "*",
       startFromBlock,
       currentBlock
     );
@@ -80,7 +70,7 @@ const processPaymentsEvents = async (startFromBlock, prisma) => {
           return resolve();
         }
 
-        await handlepaymentEvents(batches[runBatch]);
+        await handleMarketplaceEvents(batches[runBatch]);
         await prisma.Tracker_State.update({
           where: {
             contractAddress: contractsData[CURR_CHAIN_ID].address,
@@ -102,4 +92,34 @@ const processPaymentsEvents = async (startFromBlock, prisma) => {
   }
 };
 
-module.exports = processPaymentsEvents;
+const processListed = async (event) => {
+  console.log(event.blockNumber, "blockNumber");
+  const eventData = {
+    seller: event.args.seller.toString(),
+    paytoken: event.args.paytoken.toString(),
+    price: Number(event.args.price),
+    tokenId: Number(event.args.tokenId),
+    nftAddress: event.args.nftAddress.toString(),
+    timestamp: Number(event.args.timestamp),
+    listingId: Number(event.args.listingId),
+  };
+  console.log(eventData);
+  await callApi("itemListed", eventData);
+};
+
+const processSale = async (event) => {
+  console.log(event.blockNumber, "blockNumber");
+  const eventData = {
+    buyer: event.args.buyer.toString(),
+    paytoken: event.args.paytoken.toString(),
+    price: Number(event.args.price),
+    tokenId: Number(event.args.tokenId),
+    nftAddress: event.args.nftAddress.toString(),
+    timestamp: Number(event.args.timestamp),
+    listingId: Number(event.args.listingId),
+  };
+  console.log(eventData);
+  await callApi("itemBought", eventData);
+};
+
+module.exports = processMarketplaceEvents;

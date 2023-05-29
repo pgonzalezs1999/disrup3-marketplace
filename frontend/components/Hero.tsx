@@ -1,37 +1,43 @@
-import CustomButton from "./CustomButton"
-import NftCard from "./NftCard";
+import Link from "next/link";
 
 const Hero = () => {
   return (
-    <section className="flex gap-[5vw] mt-10 mx-[13%] items-center">
-        <div>
-            {/* Borrar desde aqui */}
-            <h1 className="text-3xl font-bold">BUGS/DUDAS:</h1>
-            <ul>
-                <li className="list-disc">El manejo de login funciona de aquella manera</li>
-                <li className="list-disc">Alchemy solo me devuelve 100 NFTS</li>
-            </ul>
-            <br/><br/>
-            {/* Borrar hasta aqui */}
-            <h2 className="text-primary font-bold text-5xl mb-5">Explora y tradea NFTs</h2>
+    <section className="flex mt-10 mx-[13%] items-center justify-center gap-3">
+      <div className="flex-1">
+        <h2 className="text-primary font-bold text-5xl mb-5">
+          Explora y tradea NFTs
+        </h2>
 
-            <p className="mb-4">Con Disrup3 marketplace podrás apoyar a tus creadores favoritos
-                de la forma mas descentralizada y segura posible
-            </p>
-            <div>
-                <CustomButton to="/explore">Explore</CustomButton>                
-                <CustomButton to="/addCollection">Create</CustomButton>
-            </div>
+        <p className="mb-4">
+          Con Disrup3 marketplace podrás apoyar a tus creadores favoritos de la
+          forma mas descentralizada y segura posible
+        </p>
+
+        <div>
+          <Link href="/explore">
+            <button className="btn btn-accent mr-3 w-[100px]">Explore</button>
+          </Link>
+          <button className="btn btn-secondary ml-3 w-[100px]">Create</button>
         </div>
-        <div className="hidden md:block lg:block xl:block 2xl:block">
-            <NftCard
-                id={4331}
-                name="MRC de Pablo"
-                imgUrl="https://i.seadn.io/gae/g5F9JPoY89D-KoeC6_WmX5NeH6SC7naKlDoie_vEupQ8R2OO_Kf_C5l2RUFe3GiKTBQCyioYRNtXujAUhErmWhysJJATB35ajsKuXA"
-            />
+      </div>
+
+      <div className="flex-1  hidden md:block">
+        {/** SHOW IMAGE OF MR CRYPTO */}
+        <div className="card w-67 bg-base bg-opacity-10 shadow-xl nft-card-color">
+          <img
+            className="w-[100%]"
+            src="https://i.seadn.io/gae/FdHndvSm1NaDNylgeezFF8ySxjN_p8Pmv28TcR4klfocPJk42eEvHclaX5-jURSqb1MAUgt-0v_YxI8ARAIzo5bufJI-52sdhP63?auto=format&w=1000"
+            alt="mrcryptoBase"
+          />
+
+          <div className="card-body">
+            <h3 className="">Mr crypto</h3>
+            <p>Mr. Crypto #2502</p>
+          </div>
         </div>
+      </div>
     </section>
   );
-}
+};
 
-export default Hero
+export default Hero;

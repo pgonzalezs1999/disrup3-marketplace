@@ -11,22 +11,69 @@ datasource db {
 }
 
 model User {
-  address      String @id
-  userName     String @unique
-  role         String @default("USER")
-  description  String @default("soy un usuario nuevo jaja ")
-  profileImage String @default("https://i.seadn.io/gcs/files/a719339f71b8248e3803192b6a30d2e0.png?auto=format&dpr=1&w=1000")
-  bannerImage  String @default("https://i.ytimg.com/vi/Lav15rWDXUk/maxresdefault.jpg")
+  address      String  @id
+  userName     String? @unique
+  role         String  @default("USER")
+  description  String  @default("soy un usuario nuevo jaja ")
+  profileImage String  @default("https://i.seadn.io/gcs/files/a719339f71b8248e3803192b6a30d2e0.png?auto=format&dpr=1&w=1000")
+  bannerImage  String  @default("https://i.ytimg.com/vi/Lav15rWDXUk/maxresdefault.jpg")
+
+  listings Listing[]
+  sales    Sale[]
 }
 
 model Collection {
-  address       String @id
-  name          String @default("Unknown collection")
-  owner         String @default("Unknown owner")
-  floorPrice    Float @default(0)
-  profileImage  String @default("https://i.seadn.io/gcs/files/a719339f71b8248e3803192b6a30d2e0.png?auto=format&dpr=1&w=1000")
-  bgImage       String @default("https://i.ytimg.com/vi/Lav15rWDXUk/maxresdefault.jpg")
-  website       String @default("https://www.google.com")
-  discord       String @default("https://www.google.com")
-  twitter       String @default("https://www.google.com")
+  owner    String?
+  address  String    @id
+  listings Listing[]
+  name    String    @default("No name")
+  description String @default("No description")
+  profileImage String @default("https://i.seadn.io/gcs/files/a719339f71b8248e3803192b6a30d2e0.png")
+  bgImage String @default("https://i.ytimg.com/vi/Lav15rWDXUk/maxresdefault.jpg")
+  website String @default("https://www.google.com")
+}
+
+model Nft {
+  id         Int       @id @default(autoincrement())
+  nftAddress String
+  tokenId    Int
+  chainId    String?
+  listings   Listing[]
+  sales      Sale[]
+
+  @@unique([nftAddress, tokenId])
+  @@index([nftAddress, tokenId])
+}
+
+model Listing {
+  collection Collection? @relation(fields: [nftAddress], references: [address])
+  nftAddress String
+  tokenId    Int
+  paytoken   String
+  price      Int
+  seller     String
+  isActive   Boolean
+  listingId  Int         @unique
+  timestamp  Int
+  nftId      Int
+  nft        Nft?        @relation(fields: [nftId], references: [id])
+  user       User        @relation(fields: [seller], references: [address])
+
+  @@id(fields: [nftAddress, tokenId, listingId])
+}
+
+model Sale {
+  nftAddress  String
+  timestamp   Int
+  tokenId     Int
+  paytoken    String
+  price       Int
+  buyer       String
+  listingId   Int
+  nftId       Int
+  nft         Nft     @relation(fields: [nftId], references: [id])
+  User        User?   @relation(fields: [userAddress], references: [address])
+  userAddress String?
+
+  @@id(fields: [nftAddress, tokenId, timestamp])
 }

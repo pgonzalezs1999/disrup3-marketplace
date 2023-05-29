@@ -8,12 +8,13 @@ interface Props {
 
 const MainLayout: FC<Props> = ({children}) => {
   return (
-    <div className="flex flex-col justify-between min-h-[100vh]">
-      <Navbar/>
-        {children}     
-      <Footer />      
-    </div>
-  );
-};
+    <>
+        <Navbar/>
+            {children}     
+        <Footer />      
+    </>
+   
+  )
+}
 
 export default MainLayout

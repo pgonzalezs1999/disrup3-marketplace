@@ -1,0 +1,20 @@
+{
+  "name": "payments-processor",
+  "private": true,
+  "main": " ",
+  "scripts": {
+    "dev": "turbo dev",
+    "db:generate": "turbo db:generate",
+    "db:push": "turbo db:push"
+  },
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "contracts",
+    "server",
+    "frontend"
+  ],
+  "dependencies": {
+    "turbo": "^1.9.8"
+  }
+}

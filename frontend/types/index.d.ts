@@ -15,7 +15,7 @@ declare module "iron-session" {
 interface Collection {
     address: string,
     name: string,
-    desc: string,
+    description: string,
     profileImage: string,
     bgImage: string,
     floorPrice: number,

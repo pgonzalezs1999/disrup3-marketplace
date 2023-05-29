@@ -5,25 +5,33 @@ const Footer = () => {
   const { address } = useAccount();
 
   return (
-    <footer className="footer mt-10 p-10 bg-base-200 text-base-content flex flex-wrap items-center justify-around">
-      <div className="flex flex-col items-center">
-        <img src="/logod3.jpg" alt="Disrup3" width={60} />
-        <p className="text-center">Disrup3<br/>The best web3 bootcamp</p>
+    <footer className="footer mt-10 p-10 bg-base-200 text-base-content">
+      <div>
+        <img src="./logod3.jpg" alt="" width={60} />
+        <p>
+          Disrup3
+          <br />
+          El mejor bootcamp de web3 en España
+        </p>
       </div>
-      <div className="flex flex-col items-center">
+      <div>
         <span className="footer-title">Marketplace</span>
-        <Link href="/">Homepage</Link>
-        <Link href="/explore">Explore</Link>
-        {
-          address && <Link href={`/user/${address}`}>User</Link>
-        }
+        <Link href="/">
+          <p className="link link-hover">Homepage</p>
+        </Link>
+        <Link href="/explore">
+          <p className="link link-hover">Explore</p>
+        </Link>
+        <Link href={`/user/${address}`}>
+          <p className="link link-hover">User</p>
+        </Link>
       </div>
-      <div className="flex flex-col items-center">
+      <div>
         <span className="footer-title">Company</span>
         <p className="link link-hover">Bootcamp web3</p>
         <p className="link link-hover">Bootcamp Fullstack</p>
       </div>
-      <div className="flex flex-col items-center">
+      <div>
         <span className="footer-title">Legal</span>
         <p className="link link-hover">Terms of use</p>
         <p className="link link-hover">Privacy</p>

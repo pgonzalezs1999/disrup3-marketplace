@@ -1,7 +1,39 @@
 import MainLayout from "@/components/layouts/MainLayout";
 import { ChangeEvent, FC, useState } from "react";
 import Modal from "react-modal";
-import { NFTData } from '@/types';
+
+const mockNfts = [
+  {
+    img: "https://i.seadn.io/gae/X3dno7yNPDS6lWUUoe2l1ClVQyoFWLd9VhUj-a-Pfs-aX-__qUeaEcsuIxdwdScVA-fkvaZlUqnmyJKqSqQYeWbIMqM4lnEu9kSr?auto=format&w=1000",
+    name: "mrc 9006",
+    price: 0.1,
+    likes: 0,
+  },
+  {
+    img: "https://i.seadn.io/gae/X3dno7yNPDS6lWUUoe2l1ClVQyoFWLd9VhUj-a-Pfs-aX-__qUeaEcsuIxdwdScVA-fkvaZlUqnmyJKqSqQYeWbIMqM4lnEu9kSr?auto=format&w=1000",
+    name: "mrc 9006",
+    price: 0.1,
+    likes: 0,
+  },
+  {
+    img: "https://i.seadn.io/gae/X3dno7yNPDS6lWUUoe2l1ClVQyoFWLd9VhUj-a-Pfs-aX-__qUeaEcsuIxdwdScVA-fkvaZlUqnmyJKqSqQYeWbIMqM4lnEu9kSr?auto=format&w=1000",
+    name: "mrc 9006",
+    price: 0.1,
+    likes: 0,
+  },
+  {
+    img: "https://i.seadn.io/gae/X3dno7yNPDS6lWUUoe2l1ClVQyoFWLd9VhUj-a-Pfs-aX-__qUeaEcsuIxdwdScVA-fkvaZlUqnmyJKqSqQYeWbIMqM4lnEu9kSr?auto=format&w=1000",
+    name: "mrc 9006",
+    price: 0.1,
+    likes: 0,
+  },
+  {
+    img: "https://i.seadn.io/gae/X3dno7yNPDS6lWUUoe2l1ClVQyoFWLd9VhUj-a-Pfs-aX-__qUeaEcsuIxdwdScVA-fkvaZlUqnmyJKqSqQYeWbIMqM4lnEu9kSr?auto=format&w=1000",
+    name: "mrc 9006",
+    price: 0.1,
+    likes: 0,
+  },
+];
 
 const customStyles = {
   content: {
@@ -15,12 +47,22 @@ const customStyles = {
   },
 };
 
+type NFTData = {
+  title: string;
+  media: media[];
+};
+
+type media = {
+  gateway: string;
+};
+
 const UserPage: NextPage<{
   user: User;
   isEditable: boolean;
   userNfts: NFTData[];
 }> = ({ isEditable, user, userNfts }) => {
   const [modalOpen, setModalOpen] = useState(false);
+  console.log(user);
 
   return (
     <MainLayout>
@@ -52,13 +94,10 @@ const UserPage: NextPage<{
               <p>Followers: 0</p>
             </div>
             {isEditable && (
-              <CustomButton onClick={() => setModalOpen(!modalOpen)}>
+              <button onClick={() => setModalOpen(!modalOpen)}>
                 Edit profile
-              </CustomButton>
+              </button>
             )}
-            <CustomButton onClick={() => setModalOpen(!modalOpen)}>
-              "Edit profile" de pruebas
-            </CustomButton>
           </div>
         </div>
       </section>
@@ -91,24 +130,30 @@ const UserPage: NextPage<{
 
 export default UserPage;
 
+// You should use getServerSideProps when:
+// - Only if you need to pre-render a page whose data must be fetched at request time
 import { GetServerSideProps, NextPage } from "next";
 import { withSessionSsr } from "@/utils/ironSession";
 import { PrismaClient, User } from "@prisma/client";
 import { shortenAddress } from "@/utils/address";
 import axios from "axios";
-import CustomButton from "@/components/CustomButton";
 
 export const getServerSideProps: GetServerSideProps = withSessionSsr(
   async (ctx) => {
     const prisma = new PrismaClient();
     const userAddress = ctx.req.session.user?.address;
-    
+
     const userData = await prisma.user.findUnique({
       where: {
         address: (ctx.query.user as string) || "",
       },
+      include: {
+        listings: {},
+        sales: {},
+      },
     });
-    if(!userData) {
+
+    if (!userData) {
       return {
         redirect: {
           destination: "/404",
@@ -120,7 +165,10 @@ export const getServerSideProps: GetServerSideProps = withSessionSsr(
     const { data } = await axios.get(
       `https://eth-mainnet.g.alchemy.com/nft/v2/${process.env.ALCHEMY_API_KEY}/getNFTs?owner=0xa64eeA6462463455807cdA93159aDfAa44B63dca`
     );
-
+    console.log(
+      { data },
+      "--------------------------------------------------------"
+    );
     return {
       props: {
         user: userData,
@@ -148,6 +196,7 @@ const EditUserForm: FC<Props> = ({ closeModal }) => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    console.log(formData);
   };
 
   const handleSubmit = async (e: any) => {
@@ -161,6 +210,7 @@ const EditUserForm: FC<Props> = ({ closeModal }) => {
         body: JSON.stringify({ formData }),
       });
 
+      console.log(updateUser);
       closeModal(false);
     } catch (error) {
       console.log(error);
@@ -169,9 +219,10 @@ const EditUserForm: FC<Props> = ({ closeModal }) => {
 
   return (
     <section className="max-w-[80%] w-[700px] max-h-[90vh] overflow-y-scroll bg-primary m-auto my-5 rounded-md p-5">
-      <p className="text-2xl">Edituser info</p>
+      <p className="text-2xl">Editar info de usuario</p>
       <form className="max-w-[80%] m-auto my-5">
         <div className="flex flex-col">
+          {formData.description != "" && <label>Descripción</label>}
           <label>Descripcion:</label>
           <input
             name="description"
@@ -215,9 +266,7 @@ const EditUserForm: FC<Props> = ({ closeModal }) => {
             value={formData.bgImg}
           ></input>
         </div>
-        <CustomButton onClick={handleSubmit}>
-          Actualizar
-        </CustomButton>
+        <button onClick={handleSubmit}>Actualizar</button>
       </form>
     </section>
   );
